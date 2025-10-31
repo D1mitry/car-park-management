@@ -1,0 +1,61 @@
+# .editorconfig - repository root
+# Enforces file-scoped namespaces, nullable, and common C# code-style rules for .NET 8 / C# 12
+root = true
+
+# Global defaults
+[*]
+charset = utf-8
+end_of_line = crlf
+insert_final_newline = true
+trim_trailing_whitespace = true
+
+# Editor settings for text files and project files
+[*.{cs,csproj,props,targets}]
+indent_style = space
+indent_size = 4
+
+# C# specific settings
+[*.cs]
+# Use file-scoped namespace declarations
+csharp_style_namespace_declarations = file_scoped:
+
+# Nullable reference types enabled by default for the project (works with SDK projects)
+build_property.Nullable = enable
+
+# Using directives
+csharp_using_directive_placement = inside_namespace:warning
+dotnet_sort_system_directives_first = true
+
+# var preferences
+csharp_style_var_for_built_in_types = true:suggestion
+csharp_style_var_when_type_is_apparent = true:suggestion
+csharp_style_var_elsewhere = false:suggestion
+
+# Expression-bodied members
+csharp_style_expression_bodied_methods = when_on_single_line:suggestion
+csharp_style_expression_bodied_properties = when_on_single_line:suggestion
+csharp_style_expression_bodied_constructors = false:suggestion
+csharp_style_expression_bodied_lambdas = true:suggestion
+
+# Pattern matching and other modern constructs
+csharp_style_pattern_matching_over_is_with_cast_check = true:suggestion
+csharp_style_prefer_simple_using_statement = true:suggestion
+csharp_prefer_braces = true:warning
+
+# Formatting preferences (you can tune these to taste)
+csharp_new_line_before_open_brace = all:false
+csharp_new_line_before_open_brace_types = false
+csharp_new_line_before_open_brace_methods = false
+csharp_new_line_before_open_brace_properties = false
+
+# Analyzer severities (examples; adjust to team preference)
+dotnet_analyzer_diagnostic.category-Style.severity = suggestion
+dotnet_analyzer_diagnostic.category-Security.severity = warning
+dotnet_analyzer_diagnostic.category-Performance.severity = suggestion
+
+# File header (optional - remove or customize)
+# file_header_template = Copyright (c) YourCompany. All rights reserved.
+
+# Exclude binary files from trimming trailing whitespace (if needed)
+[*.md]
+trim_trailing_whitespace = false

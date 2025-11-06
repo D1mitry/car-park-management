@@ -15,4 +15,6 @@ internal sealed class ParkingEntity
     public required DateTime TimeIn { get; init; }
 
     public DateTime? TimeOut { get; set; }
+
+    public bool IsParkingSpaceChargeApplied { get; set; }
 }

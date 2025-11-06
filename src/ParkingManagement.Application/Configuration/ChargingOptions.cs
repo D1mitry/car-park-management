@@ -10,5 +10,9 @@ internal sealed class ChargingOptions
 
     public AdditionalCharge Additional { get; set; } = new(0, 0);
 
+    public ParkingSpaceCharge ParkingSpace { get; set; } = new(0, 0);
+
     public record AdditionalCharge(int Interval, decimal Charge);
+
+    public record ParkingSpaceCharge(int LastOf, decimal Charge);
 }

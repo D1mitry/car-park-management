@@ -1,4 +1,5 @@
-﻿using MediatR;
+﻿using FluentResults;
+using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using ParkingManagement.Application.Commands.LeaveParkingSpace;
 using ParkingManagement.Application.Commands.ParkVehicle;
@@ -32,7 +33,7 @@ public sealed class ParkingController(IMediator mediator) : ControllerBase
     /// <param name="cancellationToken">A token to monitor for cancellation requests.</param>
     /// <returns>The parked vehicle details.</returns>
     [HttpPost]
-    public Task<ParkVehicleResponse> Park([FromBody] ParkingRequest request, CancellationToken cancellationToken)
+    public Task<Result<ParkVehicleResponse>> Park([FromBody] ParkingRequest request, CancellationToken cancellationToken)
         => mediator.Send(new ParkVehicleCommand(request.VehicleReg, request.VehicleType), cancellationToken);
 
     /// <summary>
@@ -42,7 +43,7 @@ public sealed class ParkingController(IMediator mediator) : ControllerBase
     /// <param name="cancellationToken">A token to monitor for cancellation requests.</param>
     /// <returns>The vehicle parking details.</returns>
     [HttpPost("[action]")]
-    public Task<LeaveParkingSpaceResponse?> Exit([FromBody] ExitParkingRequest request, CancellationToken cancellationToken)
+    public Task<Result<LeaveParkingSpaceResponse>> Exit([FromBody] ExitParkingRequest request, CancellationToken cancellationToken)
         => mediator.Send(new LeaveParkingSpaceCommand(request.VehicleReg), cancellationToken);
 }
 

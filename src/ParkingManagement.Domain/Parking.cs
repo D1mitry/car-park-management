@@ -16,13 +16,15 @@ public sealed class Parking
         VehicleType vehicleType,
         ParkingSpaceNumber parkingSpaceNumber,
         DateTime timeIn,
-        DateTime? timeOut) : base(id)
+        DateTime? timeOut,
+        bool isParkingSpaceChargeApplied) : base(id)
     {
         VehicleReg = vehicleReg;
         VehicleType = vehicleType;
         ParkingSpaceNumber = parkingSpaceNumber;
         TimeIn = timeIn;
         TimeOut = timeOut;
+        IsParkingSpaceChargeApplied = isParkingSpaceChargeApplied;
     }
 
     /// <summary>
@@ -56,25 +58,33 @@ public sealed class Parking
     public VehicleType VehicleType { get; }
 
     /// <summary>
+    /// Gets a value indicating whether parking space charge is applied.
+    /// </summary>
+    public bool IsParkingSpaceChargeApplied { get; }
+
+    /// <summary>
     /// Creates a new parking record.
     /// </summary>
     /// <param name="vehicleReg">The vehicle registration number.</param>
     /// <param name="vehicleType">The vehicle type.</param>
     /// <param name="parkingSpaceNumber">The parking space number.</param>
     /// <param name="timeIn">The time the vehicle entered the parking.</param>
+    /// <param name="isParkingSpaceChargeApplied">Indicating whether parking space charge is applied.</param>
     /// <returns></returns>
     public static Parking Create(
         string vehicleReg,
         VehicleType vehicleType,
         int parkingSpaceNumber,
-        DateTime timeIn)
+        DateTime timeIn,
+        bool isParkingSpaceChargeApplied)
         => new(
             Guid.NewGuid(),
             VehicleRegistrationNumber.Create(vehicleReg),
             vehicleType,
             ParkingSpaceNumber.Create(parkingSpaceNumber),
             timeIn,
-            null);
+            null,
+            isParkingSpaceChargeApplied);
 
     /// <summary>
     /// Exits the parking and calculates the charge.

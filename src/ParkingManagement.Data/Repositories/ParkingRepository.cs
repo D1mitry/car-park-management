@@ -20,7 +20,8 @@ internal sealed class ParkingRepository(ParkingDbContext context) : IParkingRepo
             entity.VehicleType,
             ParkingSpaceNumber.Create(entity.ParkingSpaceNumber),
             entity.TimeIn,
-            entity.TimeOut);
+            entity.TimeOut,
+            entity.IsParkingSpaceChargeApplied);
     }
 
     public async Task Save(Parking record, CancellationToken cancellationToken)
@@ -36,6 +37,7 @@ internal sealed class ParkingRepository(ParkingDbContext context) : IParkingRepo
                 VehicleReg = record.VehicleReg.Value,
                 VehicleType = record.VehicleType,
                 TimeIn = record.TimeIn,
+                IsParkingSpaceChargeApplied = record.IsParkingSpaceChargeApplied,
             };
 
             await context.Set<ParkingEntity>().AddAsync(entity, cancellationToken);

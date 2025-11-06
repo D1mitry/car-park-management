@@ -11,13 +11,16 @@ public sealed class ParkingShould
     private static readonly DateTime Date = new(2025, 10, 15, 10, 50, 00, DateTimeKind.Utc);
 
     [Theory]
-    [InlineData(VehicleType.SmallCar)]
-    [InlineData(VehicleType.MediumCar)]
-    [InlineData(VehicleType.LargeCar)]
-    public void ReturnExpectedParkingRecord_Create(VehicleType vehicleType)
+    [InlineData(VehicleType.SmallCar, false)]
+    [InlineData(VehicleType.MediumCar, false)]
+    [InlineData(VehicleType.LargeCar, false)]
+    [InlineData(VehicleType.SmallCar, true)]
+    [InlineData(VehicleType.MediumCar, true)]
+    [InlineData(VehicleType.LargeCar, true)]
+    public void ReturnExpectedParkingRecord_Create(VehicleType vehicleType, bool isParkingSpaceChargeApplied)
     {
         // Act
-        var record = Parking.Create(VehicleReg, vehicleType, ParkingSpaceNumber, Date);
+        var record = Parking.Create(VehicleReg, vehicleType, ParkingSpaceNumber, Date, isParkingSpaceChargeApplied);
 
         // Assert
         Assert.Multiple(
@@ -30,13 +33,16 @@ public sealed class ParkingShould
     }
 
     [Theory]
-    [InlineData(VehicleType.SmallCar, 9)]
-    [InlineData(VehicleType.MediumCar, 12)]
-    [InlineData(VehicleType.LargeCar, 18)]
-    public void ReturnExpectedParkingRecord_Exit(VehicleType vehicleType, decimal charge)
+    [InlineData(VehicleType.SmallCar, 9, false)]
+    [InlineData(VehicleType.MediumCar, 12, false)]
+    [InlineData(VehicleType.LargeCar, 18, false)]
+    [InlineData(VehicleType.SmallCar, 9, true)]
+    [InlineData(VehicleType.MediumCar, 12, true)]
+    [InlineData(VehicleType.LargeCar, 18, true)]
+    public void ReturnExpectedParkingRecord_Exit(VehicleType vehicleType, decimal charge, bool isParkingSpaceChargeApplied)
     {
         // Arrange
-        var record = Parking.Create(VehicleReg, vehicleType, ParkingSpaceNumber, Date);
+        var record = Parking.Create(VehicleReg, vehicleType, ParkingSpaceNumber, Date, isParkingSpaceChargeApplied);
         var timeOut = Date.AddMinutes(30);
 
         Mock<IChargingService> chargingService = new();

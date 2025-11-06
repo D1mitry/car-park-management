@@ -7,7 +7,7 @@ using ParkingManagement.Domain.Services;
 namespace ParkingManagement.Application.Services;
 
 internal sealed class ChargingService(
-    IOptions<ChargingOptions> chargingOptions)
+    IOptionsSnapshot<ChargingOptions> chargingOptions)
     : IChargingService
 {
     public decimal CalculateCharge(Parking record)
@@ -24,6 +24,9 @@ internal sealed class ChargingService(
         decimal totalCharge = duration * basicCharge;
         if (additionalIntervals > 0)
             totalCharge += additionalIntervals * chargingOptions.Value.Additional.Charge;
+
+        if (record.IsParkingSpaceChargeApplied)
+            totalCharge += chargingOptions.Value.ParkingSpace.Charge;
 
         return totalCharge;
     }

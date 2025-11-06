@@ -1,41 +1,43 @@
-﻿using MediatR;
+﻿using FluentResults;
+using MediatR;
 using Microsoft.Extensions.Options;
 using ParkingManagement.Application.Configuration;
-using ParkingManagement.Application.Data.Queries.ParkingSpaces;
-using ParkingManagement.Application.Exceptions;
+using ParkingManagement.Application.Infrastructure.Errors;
 using ParkingManagement.Application.Providers;
+using ParkingManagement.Application.Queries.NextParkingSpace;
 using ParkingManagement.Domain;
 using ParkingManagement.Domain.Repositories;
 
 namespace ParkingManagement.Application.Commands.ParkVehicle;
 
 internal sealed class ParkVehicleCommandHandler(
+    IMediator mediator,
     IDateTimeProvider dateTimeProvider,
-    IOccupiedParkingSpacesDataQuery query,
-    IOptions<ParkingOptions> parkingOptions,
+    IOptionsSnapshot<ChargingOptions> chargingOptions,
     IParkingRepository repository)
-    : IRequestHandler<ParkVehicleCommand, ParkVehicleResponse>
+    : IRequestHandler<ParkVehicleCommand, Result<ParkVehicleResponse>>
 {
-    public async Task<ParkVehicleResponse> Handle(ParkVehicleCommand request, CancellationToken cancellationToken)
+    public async Task<Result<ParkVehicleResponse>> Handle(ParkVehicleCommand request, CancellationToken cancellationToken)
     {
         Parking? record = await repository.Find(VehicleRegistrationNumber.Create(request.VehicleReg), cancellationToken);
 
         if (record is not null)
-            throw ConflictException.BecauseVehicleAlreadyParked(request.VehicleReg);
+            return ConflictError.BecauseVehicleAlreadyParked(request.VehicleReg);
 
-        var nextSpace = parkingOptions.Value.Spaces.Except(await query.Get()).FirstOrDefault();
+        var nextParkingSpace = await mediator.Send(new GetNextParkingSpaceQuery(), cancellationToken);
 
-        if (nextSpace == 0)
-            throw ConflictException.BecauseNoAvailableParkingSpaces();
+        if (nextParkingSpace.IsFailed)
+            return nextParkingSpace.ToResult();
 
         record = Parking.Create(
             request.VehicleReg,
             request.VehicleType,
-            nextSpace,
-            dateTimeProvider.UtcNow);
+            nextParkingSpace.Value.NextSpace,
+            dateTimeProvider.UtcNow,
+            nextParkingSpace.Value.AvailableSpaces <= chargingOptions.Value.ParkingSpace.LastOf);
 
         await repository.Save(record, cancellationToken);
 
-        return new(record.VehicleReg, record.ParkingSpaceNumber, record.TimeIn);
+        return new ParkVehicleResponse(record.VehicleReg, record.ParkingSpaceNumber, record.TimeIn);
     }
 }

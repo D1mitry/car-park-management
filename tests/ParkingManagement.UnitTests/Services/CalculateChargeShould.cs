@@ -1,5 +1,4 @@
 using DomainBase;
-using Microsoft.Extensions.Options;
 using ParkingManagement.Application.Configuration;
 using ParkingManagement.Application.Services;
 using ParkingManagement.Domain;
@@ -11,7 +10,7 @@ public sealed class CalculateChargeShould
     private static readonly VehicleRegistrationNumber VehicleReg = VehicleRegistrationNumber.Create("ABC123");
     private static readonly ParkingSpaceNumber ParkingSpaceNumber = ParkingSpaceNumber.Create(1);
     private static readonly DateTime Date = new(2025, 10, 15, 10, 50, 00, DateTimeKind.Utc);
-    private static readonly ChargingOptions ChargingOptions = new()
+    private static readonly TestOptionsSnapshot<ChargingOptions> ChargingOptions = new(new ChargingOptions
     {
         Basic = new Dictionary<VehicleType, decimal>
             {
@@ -20,9 +19,10 @@ public sealed class CalculateChargeShould
                 { VehicleType.LargeCar, 0.4m }
             },
         Additional = new ChargingOptions.AdditionalCharge(5, 1m),
-    };
+        ParkingSpace = new ChargingOptions.ParkingSpaceCharge(1, 5m)
+    });
 
-    private ChargingService chargingService = new(Options.Create(ChargingOptions));
+    private ChargingService chargingService = new(ChargingOptions);
 
     [Theory]
     [InlineData(VehicleType.SmallCar, 1, 0)]
@@ -72,7 +72,29 @@ public sealed class CalculateChargeShould
             vehicleType,
             ParkingSpaceNumber,
             Date,
-            Date.AddSeconds(parkingTimeSeconds));
+            Date.AddSeconds(parkingTimeSeconds),
+            false);
+
+        // Act
+        decimal result = chargingService.CalculateCharge(record);
+
+        Assert.Equal(expectedCharge, result);
+    }
+
+    [Theory]
+    [InlineData(VehicleType.SmallCar, 300, 6.5)]
+    [InlineData(VehicleType.MediumCar, 300, 7.0)]
+    [InlineData(VehicleType.LargeCar, 300, 8.0)]
+    public void CalculateExpectedParkingSpaceCharge(VehicleType vehicleType, int parkingTimeSeconds, decimal expectedCharge)
+    {
+        // Arrange
+        Parking record = GetParkingRecord(
+            VehicleReg,
+            vehicleType,
+            ParkingSpaceNumber,
+            Date,
+            Date.AddSeconds(parkingTimeSeconds),
+            true);
 
         // Act
         decimal result = chargingService.CalculateCharge(record);
@@ -92,9 +114,10 @@ public sealed class CalculateChargeShould
             vehicleType,
             ParkingSpaceNumber,
             Date,
-            Date.AddMinutes(6));
+            Date.AddMinutes(6),
+            false);
 
-        chargingService = new(Options.Create(new ChargingOptions()));
+        chargingService = new(new TestOptionsSnapshot<ChargingOptions>(new ChargingOptions()));
 
         // Act / Assert
         var exception = Assert.Throws<DomainValidationException>(() => chargingService.CalculateCharge(record));
@@ -112,7 +135,9 @@ public sealed class CalculateChargeShould
             VehicleReg,
             vehicleType,
             ParkingSpaceNumber,
-            Date);
+            Date,
+            null,
+            false);
 
         // Act / Assert
         var exception = Assert.Throws<DomainValidationException>(() => chargingService.CalculateCharge(record));
@@ -124,6 +149,7 @@ public sealed class CalculateChargeShould
         VehicleType vehicleType,
         ParkingSpaceNumber parkingSpaceNumber,
         DateTime timeIn,
-        DateTime? timeOut = null)
-            => new(Guid.NewGuid(), vehicleReg, vehicleType, parkingSpaceNumber, timeIn, timeOut);
+        DateTime? timeOut,
+        bool isParkingSpaceChargeApplied)
+            => new(Guid.NewGuid(), vehicleReg, vehicleType, parkingSpaceNumber, timeIn, timeOut, isParkingSpaceChargeApplied);
 }

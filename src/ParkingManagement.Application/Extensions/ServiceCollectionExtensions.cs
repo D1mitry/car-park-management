@@ -25,7 +25,7 @@ public static class ServiceCollectionExtensions
         => services
             .AddMediatR(cfg => cfg.RegisterServicesFromAssembly(Assembly.GetExecutingAssembly()))
             .AddSingleton<IDateTimeProvider, DateTimeProvider>()
-            .AddSingleton<IChargingService, ChargingService>()
+            .AddScoped<IChargingService, ChargingService>()
             .AddScoped(typeof(IPipelineBehavior<,>), typeof(UnitOfWorkBehavior<,>))
             .AddTransient<IRequestHandler<GetParkingSpacesQuery, ParkingSpacesQueryResponse>, GetParkingSpacesQueryHandler>();
 

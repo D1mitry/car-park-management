@@ -15,6 +15,7 @@ You can set TotalSpaces to any positive integer in the range of `ushort` c# type
 The pricing configuration is under the `Charging` section in appsettings.json, which includes two subsections:
 - `Basic` – the basic charge per minute, depending on the vehicle type.
 - `Additional` – additional charges defined under the `Charge` section, applied every specified `Interval` minutes.
+- `ParkingSpace` – the parking space charge defined under the `Charge` section, applied when a vehicle is parked among the last `LastOf` available parking spaces.
 ```json
 "Charging": {
     "Basic": {
@@ -25,6 +26,10 @@ The pricing configuration is under the `Charging` section in appsettings.json, w
     "Additional": {
         "Interval": <minutes>,
         "Charge": <value>
+    },
+    "ParkingSpace": {
+      "LastOf": <number>,
+      "Charge": <value>
     }
 }
 ```
